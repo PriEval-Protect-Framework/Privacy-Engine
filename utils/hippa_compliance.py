@@ -1,6 +1,24 @@
 
 
 class HIPAACalculator:
+    
+    """
+    Key Compliance Metrics for HIPAA:
+
+        Data Encryption: Is PHI encrypted at rest and in transit?
+
+        Access Controls: Are there role-based access controls (RBAC) to limit who can access PHI?
+
+        Audit Logs: Are access and modifications to PHI logged and monitored?
+
+        Training: Are employees trained on HIPAA compliance annually?
+
+        Risk Assessments: Are regular risk assessments conducted?
+
+        Incident Response: Is there a documented process for handling PHI breaches?
+    """
+
+
     def __init__(self):
         # Define metrics and their weights (adjustable)
         self.metrics = {

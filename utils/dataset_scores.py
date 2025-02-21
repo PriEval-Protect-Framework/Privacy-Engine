@@ -5,7 +5,12 @@ from scipy.spatial import distance # EMD Distance
 
 class DatasetScores:
     """
-        privacy risk assessment is only meaningful for QIs, since PIs are assumed to be already handled/ removed.
+    Class to calculate privacy scores for a dataset:
+    - k-anonymity
+    - l-diversity
+    - t-closeness
+    - re-identification risk
+    Note: The privacy risk assessment is only meaningful for QIs, since PIs are assumed to be already handled/ removed.
     """
     
     def k_anonymity(df, quasi_identifiers):

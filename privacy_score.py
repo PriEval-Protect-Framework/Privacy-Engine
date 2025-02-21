@@ -74,7 +74,6 @@ class PrivacyScore:
         
         return round(privacy_percentage, 2)
 
-# Example usage
 privacy = PrivacyScore.privacy_score(
     personal_identifiers=0.9,
     quasi_identifiers=0.8,

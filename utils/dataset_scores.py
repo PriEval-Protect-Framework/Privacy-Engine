@@ -21,22 +21,45 @@ class DatasetScores:
             k=min(group size for all quasi-identifier combinations)
 
         """
-        group_counts = df.groupby(quasi_identifiers).size()
-        return group_counts.min()
+        # IN CASE OF LLM HALUCINATIONS: filter out any quasi-identifiers that do not exist in the DataFrame's columns
+        valid_quasi_identifiers = [qi for qi in quasi_identifiers if qi in df.columns]
+
+        if valid_quasi_identifiers:
+            group_counts = df.groupby(valid_quasi_identifiers).size()
+            return group_counts.min()
+        else:
+            raise ValueError("No valid quasi-identifiers provided for k-anonymity calculation")
+
     
 
-    def l_diversity(self, df, quasi_identifiers, sensitive_column):
+    def l_diversity(self, df, quasi_identifiers, sensitive_columns):
         """
         Ensures that each quasi-identifier group has at least l different sensitive values.
         Protects against attribute disclosure.
         Formula:
             l=min(distinct sensitive values per group)
         """
+        
+        valid_quasi_identifiers = [qi for qi in quasi_identifiers if qi in df.columns]
 
-        diversity_counts = df.groupby(quasi_identifiers)[sensitive_column].nunique()
-        return diversity_counts.min()
+        if not valid_quasi_identifiers:
+            raise ValueError("No valid quasi-identifiers provided for l_diversity calculation")
 
-    def t_closeness(self, df, quasi_identifiers, sensitive_column):
+        min_diversity = float('inf')  
+
+        for sensitive_column in sensitive_columns:
+            if sensitive_column not in df.columns:
+                continue
+
+            # Calculate the number of unique sensitive values for each group
+            diversity_counts = df.groupby(valid_quasi_identifiers)[sensitive_column].nunique()
+            min_diversity_in_column = diversity_counts.min()
+            min_diversity = min(min_diversity, min_diversity_in_column)
+
+        return min_diversity
+        
+
+    def t_closeness(self, df, quasi_identifiers, sensitive_columns):
          
         """
         Ensures that the distribution of sensitive values in each equivalence class is close to the overall distribution of sensitive values.
@@ -51,18 +74,31 @@ class DatasetScores:
             D(P(Q),P(D)) is the distance between the sensitive attribute distribution in each group Q and the overall dataset D.
 
         """
-        overall_distribution = df[sensitive_column].value_counts(normalize=True)
-    
-        max_distance = 0
-        for _, group in df.groupby(quasi_identifiers):
-            group_distribution = group[sensitive_column].value_counts(normalize=True)
-            # Align the group distribution with the overall distribution's index
-            group_distribution = group_distribution.reindex(overall_distribution.index, fill_value=0)
-            dist = distance.jensenshannon(overall_distribution, group_distribution)
-            max_distance = max(max_distance, dist)
+        valid_quasi_identifiers = [qi for qi in quasi_identifiers if qi in df.columns]
+        if not valid_quasi_identifiers:
+            raise ValueError("No valid quasi-identifiers provided for t-closeness calculation")
 
-        return round(max_distance, 4)
-    
+        max_distance = 0
+
+        for sensitive_column in sensitive_columns:
+            if sensitive_column not in df.columns:
+                continue
+            
+            # Compute the overall distribution of the sensitive column
+            overall_distribution = df[sensitive_column].value_counts(normalize=True)
+
+            # Calculate t-closeness for each group
+            for _, group in df.groupby(valid_quasi_identifiers):
+                group_distribution = group[sensitive_column].value_counts(normalize=True)
+                # Align the group distribution with the overall distribution's index
+                group_distribution = group_distribution.reindex(overall_distribution.index, fill_value=0)
+
+                # Calculate Earth Mover's Distance (Jensen-Shannon divergence is used here as a proxy)
+                dist = distance.jensenshannon(overall_distribution, group_distribution)
+                max_distance = max(max_distance, dist)
+
+        return max_distance
+
 
     def reidentification_risk(self, df, quasi_identifiers):
         """
@@ -71,7 +107,12 @@ class DatasetScores:
         each record has a risk of 1/(group size).
         The overall risk is the weighted average of these risks.
         """
-        group_counts = df.groupby(quasi_identifiers).size()
+
+        valid_quasi_identifiers = [qi for qi in quasi_identifiers if qi in df.columns]
+        if not valid_quasi_identifiers:
+            raise ValueError("No valid quasi-identifiers provided for t-closeness calculation")
+
+        group_counts = df.groupby(valid_quasi_identifiers).size()
         
         # Compute risk for each group: risk per record is 1 / (group size)
         # Then, weight that risk by the number of records in that group.

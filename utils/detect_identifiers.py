@@ -55,6 +55,7 @@ class DetectIdentifiers:
             "4. Neither (Columns that do not fall into any of the above categories)\n"
             "Return the output as a valid JSON object with double quotes, formatted as follows: \n"
             "{ \"personal_identifiers\": [...], \"quasi_identifiers\": [...], \"sensitive_attributes\": [...], \"neither\": [...] }\n"
+            "DO NOT INVENT COLUMN NAMES. Only classify the provided column names."
             f"Column names: {column_names}"
         )
 

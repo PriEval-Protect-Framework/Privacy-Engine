@@ -67,6 +67,7 @@ class HIPAACalculator:
         print(f"Interpretation: {interpretation}")
 
 
+# Test
 if __name__ == "__main__":
     # Example HIPAA compliance scores
     scores = {
@@ -81,4 +82,5 @@ if __name__ == "__main__":
     calculator = HIPAACalculator()
 
     calculator.set_scores(scores)
+    calculator.calculate_compliance_score()
     calculator.generate_report()

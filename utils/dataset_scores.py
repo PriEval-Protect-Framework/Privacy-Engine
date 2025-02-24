@@ -1,6 +1,6 @@
 
 from scipy.spatial import distance # EMD Distance
-
+import pandas as pd
 
 
 class DatasetScores:
@@ -52,28 +52,64 @@ class DatasetScores:
 
         """
         overall_distribution = df[sensitive_column].value_counts(normalize=True)
-        
+    
         max_distance = 0
         for _, group in df.groupby(quasi_identifiers):
             group_distribution = group[sensitive_column].value_counts(normalize=True)
+            # Align the group distribution with the overall distribution's index
+            group_distribution = group_distribution.reindex(overall_distribution.index, fill_value=0)
             dist = distance.jensenshannon(overall_distribution, group_distribution)
             max_distance = max(max_distance, dist)
 
         return round(max_distance, 4)
     
 
-    def reidentification_risk(self, df, quasi_identifiers, k=2):
+    def reidentification_risk(self, df, quasi_identifiers):
         """
-        Measures the risk of re-identifying an individual from the dataset.
-        The higher the risk, the lower the privacy.
-        Formula:
-            1 - (records that share quasi-identifiers with at least k others / total_records)
-        Note: Here we took threshold k = 2 
-        
+        Calculates the average re-identification risk over all records.
+        For each equivalence class (group of records sharing the same QIs),
+        each record has a risk of 1/(group size).
+        The overall risk is the weighted average of these risks.
         """
-
         group_counts = df.groupby(quasi_identifiers).size()
-        shared_records = sum(group_counts[group_counts >= k])  # Records that share QI
-        total_records = len(df)
-        return round(1 - (shared_records / total_records), 4)
+        
+        # Compute risk for each group: risk per record is 1 / (group size)
+        # Then, weight that risk by the number of records in that group.
+        total_risk = 0
+        for group_size in group_counts:
+            total_risk += group_size * (1 / group_size)  
+            
+        # The average risk per record is the number of groups divided by the total number of records.
+        avg_risk = total_risk / len(df)
+        return round(avg_risk, 4)
+
+# Test
+if __name__ == "__main__":
+
+    # dummy data
+    data = {
+        'age': [25, 25, 30, 30, 30, 35, 35, 40, 40, 40],
+        'zipcode': ['12345', '12345', '23456', '23456', '23456', '34567', '34567', '45678', '45678', '45678'],
+        'disease': ['Flu', 'Cold', 'Flu', 'Flu', 'Cold', 'Cancer', 'Cancer', 'Diabetes', 'Diabetes', 'Flu']
+    }
+    df = pd.DataFrame(data)
+
+    # Define the quasi-identifiers and the sensitive column
+    quasi_identifiers = ['age', 'zipcode']
+    sensitive_column = 'disease'
+    
+    ds = DatasetScores()
+    
+    k_anonymity_score = ds.k_anonymity(df, quasi_identifiers)
+    print("k-anonymity score:", k_anonymity_score)
+    
+    l_diversity_score = ds.l_diversity(df, quasi_identifiers, sensitive_column)
+    print("l-diversity score:", l_diversity_score)
+    
+    t_closeness_score = ds.t_closeness(df, quasi_identifiers, sensitive_column)
+    print("t-closeness score:", t_closeness_score)
+    
+    reid_risk = ds.reidentification_risk(df, quasi_identifiers)
+    print("Re-identification risk:", reid_risk)
+
 

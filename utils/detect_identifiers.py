@@ -86,6 +86,7 @@ class DetectIdentifiers:
         return identifiers, nb_personal_identifiers, nb_quasi_identifiers, nb_sensitive_attributes
 
 
+# Test
 if __name__ == "__main__":
     
     detector = DetectIdentifiers()

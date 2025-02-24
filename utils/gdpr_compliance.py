@@ -81,7 +81,7 @@ class GDPRComplianceCalculator:
             print(f"Error: {e}")
 
 
-# Example usage
+# Test 
 if __name__ == "__main__":
 
     compliance_calculator = GDPRComplianceCalculator()

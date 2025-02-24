@@ -13,7 +13,7 @@ class DatasetScores:
     Note: The privacy risk assessment is only meaningful for QIs, since PIs are assumed to be already handled/ removed.
     """
     
-    def k_anonymity(df, quasi_identifiers):
+    def k_anonymity(self, df, quasi_identifiers):
         """
         Ensures that each record is indistinguishable from at least k-1 others.
         A dataset satisfies k-anonymity if every group of quasi-identifiers appears at least k times.
@@ -25,7 +25,7 @@ class DatasetScores:
         return group_counts.min()
     
 
-    def l_diversity(df, quasi_identifiers, sensitive_column):
+    def l_diversity(self, df, quasi_identifiers, sensitive_column):
         """
         Ensures that each quasi-identifier group has at least l different sensitive values.
         Protects against attribute disclosure.
@@ -36,7 +36,7 @@ class DatasetScores:
         diversity_counts = df.groupby(quasi_identifiers)[sensitive_column].nunique()
         return diversity_counts.min()
 
-    def t_closeness(df, quasi_identifiers, sensitive_column):
+    def t_closeness(self, df, quasi_identifiers, sensitive_column):
          
         """
         Ensures that the distribution of sensitive values in each equivalence class is close to the overall distribution of sensitive values.
@@ -62,7 +62,7 @@ class DatasetScores:
         return round(max_distance, 4)
     
 
-    def reidentification_risk(df, quasi_identifiers, k=2):
+    def reidentification_risk(self, df, quasi_identifiers, k=2):
         """
         Measures the risk of re-identifying an individual from the dataset.
         The higher the risk, the lower the privacy.

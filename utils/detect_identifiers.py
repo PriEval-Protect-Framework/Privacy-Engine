@@ -4,6 +4,7 @@ import os
 import json
 import ast
 import re
+import pandas as pd
 
 load_dotenv()
 
@@ -22,7 +23,7 @@ class DetectIdentifiers:
         GEMINI_PRO_API_KEY = os.getenv('GEMINI_PRO_API_KEY')
 
         if not GEMINI_PRO_API_KEY:
-            raise ValueError("GOOGLE_API_KEY is missing from environment variables.")
+            raise ValueError("GEMINI_PRO_API_KEY is missing from environment variables.")
         genai.configure(api_key=GEMINI_PRO_API_KEY)
         self.model = genai.GenerativeModel('gemini-pro')
 
@@ -71,6 +72,9 @@ class DetectIdentifiers:
             # Try parsing response as JSON
             cleaned=self.clean_json_string(response.text)
             identifiers = json.loads(cleaned)
+            nb_personal_identifiers = len(identifiers.get("personal_identifiers", []))
+            nb_quasi_identifiers = len(identifiers.get("quasi_identifiers", []))
+            nb_sensitive_attributes = len(identifiers.get("sensitive_attributes", []))
         except json.JSONDecodeError:
             try:
                 # Fallback: Use ast.literal_eval() for improperly formatted JSON
@@ -79,12 +83,21 @@ class DetectIdentifiers:
             except Exception as e:
                 identifiers = {"error": f"Failed to parse response from AI: {str(e)}"}
 
-        return identifiers
+        return identifiers, nb_personal_identifiers, nb_quasi_identifiers, nb_sensitive_attributes
 
 
 if __name__ == "__main__":
     
     detector = DetectIdentifiers()
-    column_names = ["name", "email", "age", "gender", "medical_history", "account_balance", "purchase_history", "blood pressure", "code postal"]
-    identifiers = detector.detect_identifiers(column_names)
+    # column_names = ["name", "email", "age", "gender", "medical_history", "account_balance", "purchase_history", "blood pressure", "code postal"]
+    
+    script_dir = os.path.dirname(__file__)
+    data_path = os.path.join(script_dir, '..', 'data', 'test', 'healthcare_dataset.csv')
+
+    df=pd.read_csv(data_path, )
+    column_names = list(df.columns)
+    identifiers, nb_personal_identifiers, nb_quasi_identifiers, nb_sensitive_attributes = detector.detect_identifiers(column_names)
     print(json.dumps(identifiers, indent=4))
+    print(f"Number of personal identifiers: {nb_personal_identifiers}")
+    print(f"Number of quasi-identifiers: {nb_quasi_identifiers}")
+    print(f"Number of sensitive attributes: {nb_sensitive_attributes}")

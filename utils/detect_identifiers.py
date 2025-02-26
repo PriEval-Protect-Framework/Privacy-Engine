@@ -25,7 +25,7 @@ class DetectIdentifiers:
         if not GEMINI_PRO_API_KEY:
             raise ValueError("GEMINI_PRO_API_KEY is missing from environment variables.")
         genai.configure(api_key=GEMINI_PRO_API_KEY)
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('gemini-2.0-flash')
 
     def clean_json_string(self, json_string):
         pattern = r'^```json\s*(.*?)\s*```$'
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     df=pd.read_csv(data_path, )
     column_names = list(df.columns)
     identifiers, nb_personal_identifiers, nb_quasi_identifiers, nb_sensitive_attributes = detector.detect_identifiers(column_names)
+    print(df.columns)
     print(json.dumps(identifiers, indent=4))
     print(f"Number of personal identifiers: {nb_personal_identifiers}")
     print(f"Number of quasi-identifiers: {nb_quasi_identifiers}")

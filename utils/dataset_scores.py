@@ -84,7 +84,6 @@ class DatasetScores:
             if sensitive_column not in df.columns:
                 continue
             
-            # Compute the overall distribution of the sensitive column
             overall_distribution = df[sensitive_column].value_counts(normalize=True)
 
             # Calculate t-closeness for each group

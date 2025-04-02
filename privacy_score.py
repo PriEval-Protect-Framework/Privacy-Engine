@@ -35,6 +35,7 @@ class PrivacyScore:
             
     def get_encryption_factor(self):
         # Map encryption types to factor values (lower is better for privacy)
+        # symmetric / asymmetric only!
         encryption_factors = {
             'None': 1.5,
             'Symmetric': 1.2,

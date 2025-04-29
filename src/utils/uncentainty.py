@@ -9,24 +9,24 @@ class Uncertainty:
         self.data = data
         self.series = SA
 
+
     def entropy(self, series):
-        probs = series.value_counts(normalize=True)
-        return -np.sum(probs * np.log2(probs))
-
-
-    def min_entropy(self, series):
-        p_max = series.value_counts(normalize=True).max()
-        return -np.log2(p_max)
-
+        counts = series.value_counts(normalize=True)
+        return -np.sum(counts * np.log2(counts))
 
     def max_entropy(self, series):
         n = series.nunique()
-        return np.log2(n)
+        return np.log2(n) if n > 0 else 0
 
     def normalized_entropy(self, series):
         h = self.entropy(series)
         h_max = self.max_entropy(series)
         return h / h_max if h_max != 0 else 0
+
+    def min_entropy(self, series):
+        p_max = series.value_counts(normalize=True).max()
+        return -np.log2(p_max) if p_max > 0 else 0
+
 
 
 if __name__ == "__main__":
@@ -39,8 +39,28 @@ if __name__ == "__main__":
 
     uncertainty= Uncertainty(DATA, SA)
 
-    print("Entropy: ", uncertainty.entropy(DATA[SA]))
-    print("Min Entropy: ", uncertainty.min_entropy(DATA[SA]))
-    print("Normalized Entropy: ", uncertainty.normalized_entropy(DATA[SA]))
+    entropy_list = []
+    min_entropy_list = []
+    normalized_entropy_list = []
+
+    if not SA:
+        avg_entropy = 0
+        avg_min_entropy = 0
+        avg_normalized_entropy = 0
+
+    else:
+        for sa in attributes['SAs']:
+            series = DATA[sa]
+            entropy_list.append(uncertainty.entropy(series))
+            min_entropy_list.append(uncertainty.min_entropy(series))
+            normalized_entropy_list.append(uncertainty.normalized_entropy(series))
+
+        avg_entropy = np.mean(entropy_list)
+        avg_min_entropy = np.mean(min_entropy_list)
+        avg_normalized_entropy = np.mean(normalized_entropy_list)
+
+    print("Average Entropy:", avg_entropy)
+    print("Average Min Entropy:", avg_min_entropy)
+    print("Average Normalized Entropy:", avg_normalized_entropy)
 
 

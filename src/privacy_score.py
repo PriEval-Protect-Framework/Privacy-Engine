@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import os
-from utils.detect_identifiers import DetectIdentifiers
+from utils.llm_attribute_classification import DetectIdentifiers
 from utils.dataset_scores import DatasetScores
 from utils.hipaa_compliance import HIPAACalculator
 from utils.gdpr_compliance import GDPRComplianceCalculator

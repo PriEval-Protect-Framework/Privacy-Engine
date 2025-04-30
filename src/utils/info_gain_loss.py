@@ -2,7 +2,7 @@ from sklearn.metrics import mutual_info_score
 from sklearn.preprocessing import OrdinalEncoder
 import numpy as np
 import pandas as pd
-from algorithmic_attribute_classification import AttributeClassification
+from src.utils.algorithmic_attribute_classification import AttributeClassification
 
 
 class InformationGainLoss:

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from algorithmic_attribute_classification import AttributeClassification
+from src.utils.algorithmic_attribute_classification import AttributeClassification
 
 import numpy as np
 import pandas as pd

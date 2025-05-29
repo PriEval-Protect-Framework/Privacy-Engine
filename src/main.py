@@ -8,6 +8,14 @@ from src.utils.uncentainty import Uncertainty
 import tempfile
 
 app = FastAPI()
+from fastapi.middleware.cors import CORSMiddleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/calcul")
 async def calculate_privacy_metrics(file: UploadFile = File(...)):

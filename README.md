@@ -18,7 +18,7 @@ It is designed for use in e-health privacy audits and compliance scoring pipelin
 - Risk estimation: k-anonymity, l-diversity, entropy, mutual information  
 - Adversary success likelihood & delta presence analysis  
 - Modular utils for integration with scoring or compliance modules  
-- ⚡ FastAPI-compatible, supports `.env` configuration
+- FastAPI-compatible
 
 ## Project Structure
 
@@ -58,13 +58,7 @@ cd Privacy-Engine
 pip install -r requirements.txt
 ```
 
-3. Create an `.env` file:
-
-```bash
-cp .env.example .env
-```
-
-4. Run :
+3. Run :
 
 ```bash
 uvicorn src.main:app --reload 
